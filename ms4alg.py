@@ -11,6 +11,14 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 import h5py
 warnings.resetwarnings()
 
+def rms(data, n):
+    meanfilter = np.ones(n)/n
+    root = np.sqrt(np.abs(data))
+    rootmean = np.convolve(meanfilter, data, mode='same')
+    rootmeansquared = np.power(rootmean,2)
+    return rootmeansquared
+
+
 def detect_on_channel(data,*,detect_threshold,detect_interval,detect_sign,margin=0):
     # Adjust the data to accommodate the detect_sign
     # After this adjustment, we only need to look for positive peaks
@@ -18,7 +26,9 @@ def detect_on_channel(data,*,detect_threshold,detect_interval,detect_sign,margin
         data=data*(-1)
     elif detect_sign==0:
         data=np.abs(data)
-    elif detect_sign>0:
+    elif detect_sign>1:
+        data=rms(data.ravel(),detect_sign) # added by Alex, not tested yet.
+    elif detect_sign==1:
         pass
 
     data=data.ravel()
